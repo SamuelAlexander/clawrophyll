@@ -1,0 +1,20 @@
+[Unit]
+Description=nanobot gateway -- Phil the houseplant agent
+Documentation=https://github.com/HKUDS/nanobot
+# Phil needs the network up: Anthropic API + Telegram long-poll. Start after the
+# App Lab app so the phil-hardware MCP server is live when nanobot connects.
+After=network-online.target clawrophyll-app.service
+Wants=network-online.target clawrophyll-app.service
+
+[Service]
+Type=simple
+# nanobot is installed via `uv tool install` into ~/.local/bin.
+# %h expands to the service user's home (/home/arduino).
+ExecStart=%h/.local/bin/nanobot gateway
+WorkingDirectory=%h
+# Restart if Phil crashes; back off 5s so a crash-loop doesn't spin.
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,12 @@
+# Python dependencies for the App Lab container. arduino-app-utils is provided
+# by the container runtime and must NOT be listed here.
+
+mcp>=1.2.0
+
+# Edge Impulse Linux runner for the "Clawrophyll" wake-word .eim (python/models/).
+# numpy/cv2 and the camera/microphone peripherals come from the container runtime.
+edge_impulse_linux
+
+# Local, offline text-to-speech (Piper) so Phil speaks his greeting aloud. The voice
+# model is downloaded to python/models/ on first use (git-ignored + rsync-excluded).
+piper-tts

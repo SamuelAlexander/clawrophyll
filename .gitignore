@@ -1,0 +1,38 @@
+# secrets / local config
+.env
+nanobot/config.json
+*.local.json
+
+# Phil's vision API key -- lives only on the board (rsync-excluded too)
+.phil_secrets
+python/.phil_secrets
+
+# nanobot runtime state (lives in ~/.nanobot on the board, never committed)
+**/HISTORY.md
+**/sessions/
+
+# Phil's state journal (runtime, regenerated)
+journal.json
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# App Lab / sketch build artefacts
+sketch/build/
+build/
+*.eim
+# ...but DO track the deployed Edge Impulse wake-word model (~13 MB, committed
+# directly -- small enough that LFS isn't worth the extra setup for cloners)
+!python/models/*.eim
+
+# Piper TTS voice models: large, generic, downloaded to the board on first use
+python/models/*.onnx
+python/models/*.onnx.json
+
+# os
+.DS_Store

@@ -1,0 +1,28 @@
+profiles:
+  default:
+    fqbn: arduino:zephyr:unoq
+    platforms:
+      - platform: arduino:zephyr
+    libraries:
+      - Arduino_Modulino (0.8.0)
+      - ArduinoJson (7.4.3)
+      # Servo arm on D3. Official Servo lib supports the zephyr arch (src/zephyr/),
+      # which bit-bangs the pulse from a timer ISR -- works on any digital pin.
+      - Servo (1.3.0)
+      # Display: Adafruit_GC9A01A is the driver of record -- Arduino_GFX renders
+      # wrong colors on this panel (blue channel missing; see the README's
+      # troubleshooting table). BusIO + GFX are Adafruit_GC9A01A dependencies.
+      - Adafruit GC9A01A (1.1.1)
+      - Adafruit GFX Library (1.12.6)
+      - Adafruit BusIO (1.17.4)
+      # Transitive deps of Arduino_Modulino. arduino-app-cli doesn't resolve
+      # these automatically, and the Modulino umbrella header pulls them in
+      # unconditionally even when we only use Thermo / Light / Distance.
+      - STM32duino VL53L4CD (1.0.5)
+      - STM32duino VL53L4ED (1.0.1)
+      - Arduino_LSM6DSOX (1.1.2)
+      - Arduino_LPS22HB (1.0.2)
+      - Arduino_HS300x (1.0.0)
+      - ArduinoGraphics (1.1.5)
+      - Arduino_LTR381RGB (1.0.1)
+default_profile: default

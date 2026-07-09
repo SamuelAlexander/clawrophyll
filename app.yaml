@@ -1,0 +1,15 @@
+# App Lab manifest. Read by arduino-app-cli when this project is installed/started.
+
+name: Clawrophyll
+description: Phil, a houseplant running a full AI agent -- senses his soil and room, pulls faces on a round display, waves a pincer, sees through a webcam, answers to his name out loud, and chats (dryly) on Telegram.
+icon: 🪴
+
+# Port 8765 hosts our MCP HTTP server. Exposed to the host so nanobot
+# (running on the host as a systemd service) can connect to it.
+ports: [8765]
+
+# Deliberately empty. The camera/mic/speaker are App Lab *peripherals* (already
+# in the container), and cloud_llm is a library-only brick -- importable without
+# being declared here. Not declaring it also means a missing API key can never
+# block `app start` (and with it the always-on display).
+bricks: []

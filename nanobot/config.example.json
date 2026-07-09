@@ -1,0 +1,41 @@
+{
+  "_comment": "OVERLAY, not a full config. `nanobot onboard` generates the real ~/.nanobot/config.json (~500 lines of defaults). This file documents only the keys Clawrophyll changes -- apply them by hand to the onboarded file. Schema verified against nanobot's onboarded output. Do NOT commit the filled-in copy; secrets stay on the board.",
+
+  "agents": {
+    "defaults": {
+      "model": "anthropic/claude-opus-4-5",
+      "provider": "auto",
+      "workspace": "~/.nanobot/workspace",
+      "botName": "Phil",
+      "botIcon": "🪴",
+      "timezone": "Asia/Jakarta"
+    }
+  },
+
+  "providers": {
+    "anthropic": { "apiKey": "${ANTHROPIC_API_KEY}" }
+  },
+
+  "channels": {
+    "telegram": {
+      "enabled": true,
+      "token": "${TELEGRAM_BOT_TOKEN}",
+      "allowFrom": ["${TELEGRAM_ALLOWED_USER_ID}"]
+    }
+  },
+
+  "gateway": {
+    "_comment_heartbeat": "Phil's sense-and-decide loop runs on the heartbeat. Default is 1800s (30 min); we use 3600s (hourly) -- a plant changes slowly and the heartbeat runs on the agent's model (Opus, no per-job override), so the interval is the cost lever. Sam can still message Phil for an on-demand check anytime. Changing this needs a nanobot restart.",
+    "heartbeat": { "intervalS": 3600 }
+  },
+
+  "tools": {
+    "mcpServers": {
+      "_comment_phil_hardware": "HTTP/SSE transport: the MCP server runs inside the App Lab container (started via `arduino-app-cli app start ~/ArduinoApps/clawrophyll`). The container exposes port 8765 to the host loopback (see app.yaml `ports`). Schema confirmed against nanobot's MCPServerConfig.",
+      "phil-hardware": {
+        "type": "sse",
+        "url": "http://127.0.0.1:8765/sse"
+      }
+    }
+  }
+}

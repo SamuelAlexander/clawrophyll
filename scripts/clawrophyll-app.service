@@ -1,0 +1,24 @@
+[Unit]
+Description=Clawrophyll App Lab app (MCU sketch + phil-hardware MCP server)
+# The App Lab app must be started for the MCU sketch (display) to run and for
+# the MCP server container to come up. Ordered before nanobot so the agent
+# connects to a live MCP server on boot (nanobot's MCP/SSE doesn't reconnect).
+After=network-online.target
+Wants=network-online.target
+Before=nanobot.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# Wait (up to ~60s) for the arduino-app-cli daemon to be ready, then start the app.
+ExecStartPre=/bin/sh -c 'for i in $(seq 1 30); do /usr/bin/arduino-app-cli app list >/dev/null 2>&1 && break; sleep 2; done'
+ExecStart=/usr/bin/arduino-app-cli app start %h/ArduinoApps/clawrophyll
+ExecStop=/usr/bin/arduino-app-cli app stop %h/ArduinoApps/clawrophyll
+# Generous: after an App Lab/core update, the first `app start` recompiles the
+# whole sketch + reprovisions the venv on the A53, which can take 15+ minutes.
+# (Normal boots start in seconds; 300s here once killed the post-update rebuild
+# mid-flight and left the board with no app on boot.)
+TimeoutStartSec=1800
+
+[Install]
+WantedBy=default.target
