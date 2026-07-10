@@ -18,7 +18,6 @@ Phil is a houseplant with a nervous system. A 3D-printed crab pot holds a round 
 a face and a servo pincer; a stand beside it carries his three sensors, and a probe sits in
 the soil. Add a webcam, a microphone, and a speaker. On top: a real Japanese cedar.
 
-He is deadpan, convinced he will outlive everyone in the room, and useful despite himself.
 Say "Clawrophyll" and he waves, then tells you how he is, out loud. Let his soil dry and he
 texts you before his needles brown. Stand too close and he complains you block his light.
 Ask him to read a note, look something up, or set a reminder, and he does, complaining the
