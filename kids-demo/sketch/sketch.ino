@@ -63,7 +63,8 @@ const uint16_t kLime = 0x87E0, kGray = 0x8410, kRingBg = 0x2104;
 const int kSoilDry = 944, kSoilWet = 594;           // probe raw in air / in water
 const unsigned long kSkitMinMs = 20000, kSkitMaxMs = 120000;  // idle skit interval
 const unsigned long kReactMs = 2000, kCardMs = 3000;          // reaction face, then card
-const unsigned long kRepeatMs = 8000;   // same reaction again within this = face only
+const unsigned long kRepeatMs = 20000;  // same reaction again within this = face only
+const unsigned long kArmCooldownMs = 12000;  // arm rests this long between gestures (faces still react)
 const unsigned long kStaleMs = 20000;   // condition held this long -> back to idle
 const unsigned long kRebaseMs = 60000;  // ...this long -> accept it as the new normal
 const unsigned long kNagMs = 60000;     // stale soil/hand condition: replay this often
@@ -456,6 +457,7 @@ float seg_from = kArmRest, seg_to = kArmRest;
 unsigned long seg_t0 = 0, seg_ms = 0, hold_until = 0;
 bool  arm_attached = false, arm_holding = false;
 const char* arm_last = "home";
+unsigned long arm_idle_since = 0;        // when the last gesture ended (0 = never moved)
 
 int arm_angle(int a) {
   if (kArmMirror) a = 2 * kArmRest - a;
@@ -510,7 +512,7 @@ void service_arm(unsigned long now) {
     return;
   }
   if ((long)(now - hold_until) < 0) return;
-  if (++arm_step >= arm_g->len) { arm.detach(); arm_attached = false; arm_g = nullptr; return; }
+  if (++arm_step >= arm_g->len) { arm.detach(); arm_attached = false; arm_g = nullptr; arm_idle_since = now; return; }
   start_segment(now);
 }
 
@@ -547,8 +549,11 @@ const char* seq_name = "";
 void start_step(unsigned long now) {
   const Step& st = seq[seq_i];
   if (st.card >= 0) show_card(st.card); else show_face((Face)st.face);
-  unsigned long g_ms = gesture_ms(st.gest);       // a step lasts at least its gesture
-  play_gesture(st.gest);
+  // The arm joins in only if it's already moving or has rested kArmCooldownMs.
+  bool arm_ok = arm_g != nullptr || arm_idle_since == 0 || now - arm_idle_since >= kArmCooldownMs;
+  int g = arm_ok ? st.gest : G_NONE;
+  unsigned long g_ms = gesture_ms(g);             // a step lasts at least its gesture
+  play_gesture(g);
   step_end_ms = now + (g_ms + 150 > st.ms ? g_ms + 150 : st.ms);
 }
 void play_seq(const Step* steps, int len, const char* name, unsigned long now) {

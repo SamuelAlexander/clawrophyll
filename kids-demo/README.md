@@ -43,6 +43,9 @@ tuning; nothing depends on it.
 - **Long-held conditions settle down.** After 20 s the face returns to idle. After 60 s a
   light or temperature change is accepted as the new normal; a soil or hand condition
   instead replays its reaction once a minute.
+- **The arm doesn't overdo it.** After a gesture the arm rests at least 12 s
+  (`kArmCooldownMs`), and the same reaction within 20 s (`kRepeatMs`) shows only the face;
+  faces and cards still react every time.
 - **Smooth, slow arm.** Gestures are time-based with cosine easing, so screen redraws can't
   stall them. Every angle is clamped to a safe range in firmware, and moves near a very
   close hand are slower.
@@ -93,6 +96,7 @@ arm section:
 | `kStaleMs`, `kRebaseMs`, `kNagMs` | When a long-held condition settles down |
 | `kLoveMs` | How long a hand must stay for hearts |
 | `kSoilDry`, `kSoilWet` | Soil probe calibration (raw reading in air / in water) |
+| `kArmCooldownMs`, `kRepeatMs` | Minimum arm rest between gestures; face-only repeats |
 | `kArmSpeed` | Overall arm speed (1 = Clawrophyll's speed, now 0.2) |
 | `kArmMin`, `kArmMax`, `kArmRest` | Safe servo range and rest angle |
 
