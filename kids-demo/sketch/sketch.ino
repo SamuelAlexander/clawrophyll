@@ -14,7 +14,7 @@
 //                 hand in front (12-40 cm) -> happy + wave
 //                 hand very close (<12 cm) -> surprised + slow nudge
 //                 hand stays 5 s+          -> hearts
-//                 3 quick pokes in 10 s    -> angry "Hey!"
+//                 3 jabs (<10 cm) in 10 s  -> angry "Hey!"
 //                 light sensor covered     -> sleepy Zzz + slump
 //                 torch on light sensor    -> too bright + shades his eyes
 //                 breath on thermo sensor  -> sweating + fans himself
@@ -594,7 +594,7 @@ bool on[K_COUNT];
 unsigned long on_since[K_COUNT], pend_since[K_COUNT], last_react[K_COUNT], last_nag[K_COUNT];
 int top = K_NONE;
 unsigned long hand_since = 0, poked_until = 0, pokes[3] = {0, 0, 0};
-bool hand_was = false;
+bool hand_was = false, jab = false;
 
 bool cond_want(int k) {
   const bool o = on[k];
@@ -632,13 +632,19 @@ void update_conditions(unsigned long now) {
       on[k] = want; on_since[k] = now; pend_since[k] = 0;
     }
   }
-  // Hand-derived: love (hand held in front) and poked (3 arrivals within 10 s).
-  bool hand = on[K_HAND_NEAR] || on[K_HAND_CLOSE];
-  if (hand && !hand_was) {
-    hand_since = now;
+  // Pokes: quick jabs toward the distance sensor, read raw (no dwell) so a fast
+  // in-and-out counts, and a kid standing within hand range doesn't hide it.
+  const bool dv = !isnan(s.dist_mm);
+  if (!jab && dv && s.dist_mm < 100) {
+    jab = true;
     pokes[0] = pokes[1]; pokes[1] = pokes[2]; pokes[2] = now;
     if (pokes[0] && now - pokes[0] < 10000) { poked_until = now + 4000; pokes[0] = pokes[1] = pokes[2] = 0; }
+  } else if (jab && (!dv || s.dist_mm > 160)) {
+    jab = false;
   }
+  // Love: a hand held in front.
+  bool hand = on[K_HAND_NEAR] || on[K_HAND_CLOSE];
+  if (hand && !hand_was) hand_since = now;
   hand_was = hand;
   bool love = hand && now - hand_since >= kLoveMs;
   if (love != on[K_LOVE]) { on[K_LOVE] = love; on_since[K_LOVE] = now; }

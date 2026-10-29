@@ -15,7 +15,7 @@ USB camera, mic, and speaker. Any plant works; this build used a cactus.
 | Hand in front (12 to 40 cm) | happy + wave | distance card |
 | Hand very close (under 12 cm) | surprised + slow, gentle nudge | distance card |
 | Keep a hand there for 5 s | hearts + sway | |
-| Poke in and out 3 times in 10 s | angry "Hey!" | |
+| Jab a finger at the distance sensor (closer than 10 cm) 3 times in 10 s | angry "Hey!" | |
 | Cover the light sensor (it faces up) | sleepy Zzz + slump | light card |
 | Shine a phone torch on it | too bright + raises the claw for shade | light card |
 | Breathe on the thermo sensor | sweating + fans himself | humidity card |
