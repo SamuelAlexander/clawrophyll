@@ -11,9 +11,9 @@
 //   Reactions   a sensor change -> face + arm gesture (2 s, or until the arm finishes) -> readout card of
 //               the sensor that caused it (~3 s) -> back to the face, which holds the
 //               reaction while the condition lasts.
-//                 hand in front (12-40 cm) -> happy + wave
+//                 hand in front (12-30 cm) -> happy + wave
 //                 hand very close (<12 cm) -> surprised + slow nudge
-//                 hand stays 5 s+          -> hearts
+//                 hand held <25 cm, 5 s    -> hearts
 //                 2 jabs (<10 cm) in 10 s  -> angry "Hey!"
 //                 light sensor covered     -> sleepy Zzz + slump
 //                 torch on light sensor    -> too bright + shades his eyes
@@ -368,7 +368,7 @@ void card_reading(int c, char* val, float& frac, const char*& cap) {
       if (isnan(s.dist_mm)) { strcpy(val, "--"); frac = 0; cap = "Nobody?"; break; }
       snprintf(val, 12, "%d", (int)lroundf(s.dist_mm / 10.0f));
       frac = 1.0f - s.dist_mm / 500.0f;
-      cap = s.dist_mm < 120 ? "Too close!" : (s.dist_mm < 400 ? "Hi there!" : "Peekaboo?");
+      cap = s.dist_mm < 120 ? "Too close!" : (s.dist_mm < 300 ? "Hi there!" : "Peekaboo?");
       break;
   }
   frac = frac < 0 ? 0 : (frac > 1 ? 1 : frac);
@@ -593,8 +593,8 @@ bool cond_rebases(int k) { return k == K_COLD || k == K_BREATH || k == K_BRIGHT 
 bool on[K_COUNT];
 unsigned long on_since[K_COUNT], pend_since[K_COUNT], last_react[K_COUNT], last_nag[K_COUNT];
 int top = K_NONE;
-unsigned long hand_since = 0, poked_until = 0, last_jab = 0;
-bool hand_was = false, jab = false;
+unsigned long hold_since = 0, hold_gap = 0, poked_until = 0, last_jab = 0;
+bool jab = false;
 
 bool cond_want(int k) {
   const bool o = on[k];
@@ -607,7 +607,7 @@ bool cond_want(int k) {
                          (o ? s.temp_c < base_temp - 1.5f : s.temp_c < base_temp - 2.5f);
     case K_BREATH:return !isnan(base_hum) && !isnan(s.hum_pct) &&
                          (o ? s.hum_pct > base_hum + 4 : s.hum_pct > base_hum + 8);
-    case K_HAND_NEAR:  return dv && (o ? d < 480 : d < 400);
+    case K_HAND_NEAR:  return dv && (o ? d < 350 : d < 300);
     case K_HAND_CLOSE: return dv && (o ? d < 150 : d < 120);
     case K_BRIGHT: if (isnan(base_lux) || s.lux < 0) return false;
                    return o ? s.lux > fmaxf(base_lux * 2.0f, base_lux + 250)
@@ -642,11 +642,11 @@ void update_conditions(unsigned long now) {
   } else if (jab && (!dv || s.dist_mm > 160)) {
     jab = false;
   }
-  // Love: a hand held in front.
-  bool hand = on[K_HAND_NEAR] || on[K_HAND_CLOSE];
-  if (hand && !hand_was) hand_since = now;
-  hand_was = hand;
-  bool love = hand && now - hand_since >= kLoveMs;
+  // Love: a hand deliberately held near the stand (<25 cm), so a kid merely standing
+  // in front doesn't count. Dropouts shorter than 400 ms don't reset the timer.
+  if (dv && s.dist_mm < 250) { if (!hold_since) hold_since = now; hold_gap = 0; }
+  else if (hold_since) { if (!hold_gap) hold_gap = now; if (now - hold_gap > 400) hold_since = 0; }
+  bool love = hold_since && now - hold_since >= kLoveMs;
   if (love != on[K_LOVE]) { on[K_LOVE] = love; on_since[K_LOVE] = now; }
   bool poked = (long)(poked_until - now) > 0;
   if (poked != on[K_POKED]) { on[K_POKED] = poked; on_since[K_POKED] = now; }
