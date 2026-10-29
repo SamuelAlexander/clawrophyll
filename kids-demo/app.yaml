@@ -1,0 +1,8 @@
+# App Lab manifest for the offline kids-demo spin-off of Clawrophyll.
+name: Clawrophyll Kids
+description: Offline, sensor-driven Clawrophyll for classroom demos. No AI, no internet. Poke the sensors and the face and pincer react; idle skits keep him lively.
+icon: 🌵
+
+# No ports, no bricks: everything runs in the MCU sketch. The Python side is a
+# passive logger, so nothing here needs the network.
+bricks: []
