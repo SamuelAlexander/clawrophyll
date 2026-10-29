@@ -14,7 +14,7 @@
 //                 hand in front (12-40 cm) -> happy + wave
 //                 hand very close (<12 cm) -> surprised + slow nudge
 //                 hand stays 5 s+          -> hearts
-//                 3 jabs (<10 cm) in 10 s  -> angry "Hey!"
+//                 2 jabs (<10 cm) in 10 s  -> angry "Hey!"
 //                 light sensor covered     -> sleepy Zzz + slump
 //                 torch on light sensor    -> too bright + shades his eyes
 //                 breath on thermo sensor  -> sweating + fans himself
@@ -585,7 +585,7 @@ const Reaction kReact[K_COUNT] = {
   {F_LOVE, G_SWAY, -1},                       // hand stays
   {F_TOO_BRIGHT, G_SHADE, C_LIGHT},           // torch
   {F_SLEEPY, G_SLUMP, C_LIGHT},               // light sensor covered
-  {F_ANGRY, G_NUDGE_SOFT, -1},                // poked 3x
+  {F_ANGRY, G_NUDGE_SOFT, -1},                // poked 2x
 };
 // Rebase-able (baseline) conditions clear by accepting the new normal; the rest nag.
 bool cond_rebases(int k) { return k == K_COLD || k == K_BREATH || k == K_BRIGHT || k == K_DARK; }
@@ -593,7 +593,7 @@ bool cond_rebases(int k) { return k == K_COLD || k == K_BREATH || k == K_BRIGHT 
 bool on[K_COUNT];
 unsigned long on_since[K_COUNT], pend_since[K_COUNT], last_react[K_COUNT], last_nag[K_COUNT];
 int top = K_NONE;
-unsigned long hand_since = 0, poked_until = 0, pokes[3] = {0, 0, 0};
+unsigned long hand_since = 0, poked_until = 0, last_jab = 0;
 bool hand_was = false, jab = false;
 
 bool cond_want(int k) {
@@ -637,8 +637,8 @@ void update_conditions(unsigned long now) {
   const bool dv = !isnan(s.dist_mm);
   if (!jab && dv && s.dist_mm < 100) {
     jab = true;
-    pokes[0] = pokes[1]; pokes[1] = pokes[2]; pokes[2] = now;
-    if (pokes[0] && now - pokes[0] < 10000) { poked_until = now + 4000; pokes[0] = pokes[1] = pokes[2] = 0; }
+    if (last_jab && now - last_jab < 10000) { poked_until = now + 4000; last_jab = 0; }  // 2nd jab
+    else last_jab = now;
   } else if (jab && (!dv || s.dist_mm > 160)) {
     jab = false;
   }
